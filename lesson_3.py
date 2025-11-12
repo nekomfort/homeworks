@@ -8,7 +8,7 @@
 """
 Алгоритма Нидлмана-Вунша.
 """
-
+#help
 import time
 import os
 
