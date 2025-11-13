@@ -1,0 +1,16 @@
+FROM rocker/r-ver:4.3.2
+
+ENV LC_ALL=C.UTF-8 \
+    LANG=C.UTF-8
+
+RUN install2.r --error --skipinstalled readxl
+
+WORKDIR /app
+COPY hw2.R /app/hw2.R
+
+VOLUME ["/output"]
+
+ENV INPUT_PATH=./common/Пациенты.xlsx \
+    OUTPUT_DIR=/output
+
+CMD ["Rscript", "/app/hw2.R"]
