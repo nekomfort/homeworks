@@ -1,6 +1,19 @@
-install.packages("readxl")
+#!/usr/bin/env Rscript
+
+Sys.setlocale(category = "LC_ALL", locale = "C.UTF-8")
+
+if (!requireNamespace("readxl", quietly = TRUE)) {
+  install.packages("readxl", repos = "https://cloud.r-project.org")
+}
 library(readxl)
-patients <- read_excel("./common/Пациенты.xlsx")
+
+INPUT_PATH  <- Sys.getenv("INPUT_PATH",  unset = "./common/Пациенты.xlsx")
+OUTPUT_DIR  <- Sys.getenv("OUTPUT_DIR",  unset = "/output")
+if (!dir.exists(OUTPUT_DIR)) dir.create(OUTPUT_DIR, recursive = TRUE, showWarnings = FALSE)
+OUTPUT_CSV  <- file.path(OUTPUT_DIR, "анализ_гемоглобина.csv")
+OUTPUT_PNG  <- file.path(OUTPUT_DIR, "boxplot_глюкоза_по_полу.png") 
+
+patients <- read_excel(INPUT_PATH)
 getwd()
 
 #1.
@@ -49,20 +62,13 @@ aggregate(глюкоза ~ Пол, data = patients, FUN = function(x) c(mean = m
 
 #9 см.8 
 
-#10 
+#10 (сохраняем в PNG вместо окна)
+png(OUTPUT_PNG, width = 1000, height = 700, res = 150)
 boxplot(глюкоза ~ Пол, data = patients, main = 'Распределение глюкозы по полу', xlab = "Пол", ylab = "Уровень глюкозы")
+dev.off()
 
 #11
 t.test(лейкоциты ~ Пол, data = patients)
-
-#data:  лейкоциты by Пол
-#t = -1.6819, df = 190.37, p-value = 0.09424
-#alternative hypothesis: true difference in means between group ж and group м is not equal to 0
-#95 percent confidence interval:
-#-1.12932261  0.08981821
-#sample estimates:
-#mean in group ж mean in group м 
-#7.708879        8.228631
 
 #12
 patients_task <- patients
@@ -96,5 +102,7 @@ aggregate(лейкоциты ~ Пол, data = patients_no_na, FUN = mean)
 final_result <- aggregate(гемоглобин ~ возраст_группа_2, data = patients, FUN = function(x) c(mean = mean(x), sd = sd(x)))
 colnames(final_result) <- c("Возрастная группа", "Среднее и стандартное отклонение")
 
-#18
-write.csv(final_result, "анализ_гемоглобина.csv", row.names = FALSE)
+#18 — пишем CSV в смонтированную папку на сервере
+write.csv(final_result, OUTPUT_CSV, row.names = FALSE, fileEncoding = "UTF-8")
+
+cat(sprintf("CSV сохранён: %s\nГрафик сохранён: %s\n", OUTPUT_CSV, OUTPUT_PNG))
