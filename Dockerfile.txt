@@ -1,0 +1,13 @@
+FROM r-base:4.4.0
+
+WORKDIR /app
+
+RUN R -e "install.packages('dplyr')"
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY join.R /app/join.R
+
+CMD ["bash"]
