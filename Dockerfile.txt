@@ -1,0 +1,9 @@
+FROM r-base:4.4.0
+
+WORKDIR /app
+
+RUN R -e "install.packages('dplyr')"
+
+COPY join.R /app/join.R
+
+CMD ["Rscript", "/app/join.R"]
